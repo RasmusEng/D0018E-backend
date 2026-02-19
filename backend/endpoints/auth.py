@@ -83,7 +83,7 @@ def logout():
         return jsonify({'error':'No is work'}), 500
 
 # Just check if user info corresponts to admin user
-@auth_bp.route('/auth/checkAdminCredentials', methods=['GET'])
+@auth_bp.route('/auth/checkAdminCredentials', methods=['POST'])
 def checkIfAdminCredentials():
     email = request.json.get('email', None)
     password = request.json.get('password', None)

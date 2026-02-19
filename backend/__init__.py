@@ -3,6 +3,7 @@ import secrets
 from . import db
 from flask import Flask
 from flask_jwt_extended import  JWTManager
+from flask_cors import CORS
 
 jwt = JWTManager()
 
@@ -12,6 +13,8 @@ jwt = JWTManager()
 # Combo of docs, ai, and own
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    
+    CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_mapping(
         SECRET_KEY='dev',  # Key should be something random for deployment
         DATABASE=os.environ.get("DATABASE_URL"),
