@@ -6,7 +6,7 @@ orders_bp = Blueprint('orders', __name__)
 
 
 @orders_bp.route('/orders/addToCart', methods=['POST'])
-@jwt_required()
+@jwt_required() # Atm we only allow loged in users to add to cart
 def addToCart():
     productId = request.json.get('product_id', None)
     db = get_db()
@@ -18,9 +18,8 @@ def addToCart():
 
     try:
         with db.cursor() as cur:
-            
-            # If have user_id check if user has a active cart
-            #if(user_id):
+
+            # Try to get order_id
             cur.execute(
                 "SELECT order_id FROM orders WHERE user_id = %s AND order_status = 0",
                 (user_id,)
@@ -28,14 +27,6 @@ def addToCart():
 
             result = cur.fetchone();
             
-            #else: # We dont have a user_id so we need to create a user
-            #    cur.execute("""
-            #        INSERT INTO users (email, password, admin) VALUES (%s, %s, %s)
-            #        RETURNING user_id
-            #        """,(None, None, False)
-            #    )
-            #    user_id = cur.fetchone()['user_id']
-
             # We have a order_id
             if(result): 
                 order_id = result['order_id']
@@ -47,16 +38,16 @@ def addToCart():
                 )
                 order_id = cur.fetchone()['order_id']
 
-            # Add item to cart
+            # Add item to cart and if the given item already exsists just add one to it 
             cur.execute("""
-                INSERT INTO order_items (order_id, product_id) VALUES(%s, %s)
+                INSERT INTO order_items (order_id, product_id, quantity) VALUES(%s, %s, 1)
                 ON CONFLICT (order_id, product_id)
                 DO UPDATE SET quantity = order_items.quantity + 1
                 """,(order_id,productId,)
             )
             
             db.commit()
-            return jsonify({}), 200
+            return jsonify({'message': 'Item added to cart successfully'}), 200
             
     except Exception as e:
-        return jsonify({'error':'No is work'}), 500
+        return jsonify({'error': str(e)}), 500

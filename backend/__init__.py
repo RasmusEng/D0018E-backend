@@ -7,6 +7,8 @@ jwt = JWTManager()
 
 # Might need to change here for pool
 # Mainly flask docs
+
+# Combo of docs, ai, and own
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(

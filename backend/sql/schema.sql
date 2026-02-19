@@ -24,9 +24,9 @@ END $$;
     
 CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    email VARCHAR(50) UNIQUE,
-    password VARCHAR(255),
-    admin BOOLEAN
+    email VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    admin BOOLEAN NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS products (
 
 CREATE TABLE IF NOT EXISTS orders (
     order_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id INTEGER NOT NULL, 
-    order_status SMALLINT,
+    user_id INTEGER, 
+    order_status SMALLINT NOT NULL,
     order_date DATE,
     shipped_date DATE,
  
@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
-    order_id INTEGER,
-    product_id INTEGER,
-    quantity INTEGER,
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
     list_price NUMERIC(10, 2),
 
     PRIMARY KEY (order_id, product_id),
