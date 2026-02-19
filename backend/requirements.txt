@@ -4,3 +4,4 @@ python-dotenv
 psycopg-pool
 click
 flask-jwt-extended
+secrets

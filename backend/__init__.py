@@ -1,4 +1,5 @@
 import os
+import secrets
 from . import db
 from flask import Flask
 from flask_jwt_extended import  JWTManager
@@ -14,7 +15,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',  # Key should be something random for deployment
         DATABASE=os.environ.get("DATABASE_URL"),
-        JWT_SECRET_KEY = "SUPER SECRET KEY"
+        JWT_SECRET_KEY = secrets.token_hex(64)
         # Should add so tokens expire like 1h after last request or similar
     )
 
