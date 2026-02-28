@@ -100,3 +100,42 @@ def getUsersCartInfo():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+    
+@orders_bp.route('/orders/removeFromCart', methods=['POST'])
+@jwt_required() 
+def removeFromCart():
+    db = get_db()
+    user_id = get_jwt_identity()
+
+    data = request.get_json()
+    product_id = data.get('product_id')
+
+    if not product_id:
+        return jsonify({'error': 'Product ID is required'}), 400
+
+    try:
+        with db.cursor() as cur:
+            cur.execute("""
+                DELETE FROM order_items 
+                WHERE product_id = %s 
+                AND order_id = (
+                    SELECT order_id 
+                    FROM orders 
+                    WHERE user_id = %s AND order_status = 0
+                )
+                RETURNING product_id; 
+                """, (product_id, user_id,)
+            )
+            
+            deleted_item = cur.fetchone()
+            
+            if not deleted_item:
+                 return jsonify({'error': 'Specimen not found in incubator'}), 404
+
+            db.commit()
+            return jsonify({'message': 'Specimen safely removed'}), 200
+
+    except Exception as e:
+        db.rollback() 
+        return jsonify({'error': str(e)}), 500
