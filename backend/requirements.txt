@@ -5,3 +5,4 @@ psycopg-pool
 click
 flask-jwt-extended
 secrets
+flask_cors

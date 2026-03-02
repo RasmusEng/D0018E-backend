@@ -14,6 +14,7 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/auth/register', methods=['POST'])
 def register():
     email = request.json.get('email')
+    name = request.json.get('name')
     password = request.json.get('password')
     isAdmin = request.json.get('isAdmin')
     db = get_db()
@@ -22,14 +23,16 @@ def register():
         return jsonify({'error': 'Email is required.'}), 409
     elif not password:
         return jsonify({'error': 'Password is required.'}), 409
+    elif not name:
+        return jsonify({'error': 'Name is required.'}), 409
     elif isAdmin is None:
         return jsonify({'error': 'isAdmin is required'}), 409
     try:
         with db.cursor() as cur:
 
             cur.execute(
-                "INSERT INTO users (email, password, admin) VALUES (%s, %s, %s)",
-                (email, generate_password_hash(password),isAdmin,)
+                "INSERT INTO users (email, password, admin, name) VALUES (%s, %s, %s, %s)",
+                (email, generate_password_hash(password),isAdmin, name)
             )
 
             db.commit()
