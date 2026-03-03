@@ -14,6 +14,7 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/auth/register', methods=['POST'])
 def register():
     email = request.json.get('email')
+    name = request.json.get('name')
     password = request.json.get('password')
     isAdmin = request.json.get('isAdmin')
     db = get_db()
@@ -22,14 +23,16 @@ def register():
         return jsonify({'error': 'Email is required.'}), 409
     elif not password:
         return jsonify({'error': 'Password is required.'}), 409
+    elif not name:
+        return jsonify({'error': 'Name is required.'}), 409
     elif isAdmin is None:
         return jsonify({'error': 'isAdmin is required'}), 409
     try:
         with db.cursor() as cur:
 
             cur.execute(
-                "INSERT INTO users (email, password, admin) VALUES (%s, %s, %s)",
-                (email, generate_password_hash(password),isAdmin,)
+                "INSERT INTO users (email, password, admin, name) VALUES (%s, %s, %s, %s)",
+                (email, generate_password_hash(password),isAdmin, name)
             )
 
             db.commit()
@@ -81,6 +84,35 @@ def logout():
             
     except Exception as e:
         return jsonify({'error':'No is work'}), 500
+
+# Just check if user info corresponts to admin user
+@auth_bp.route('/auth/checkAdminCredentials', methods=['POST'])
+def checkIfAdminCredentials():
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+    db = get_db()
+
+    if not email:
+        return jsonify({'error': 'Email is required.'}), 400
+    elif not password:
+        return jsonify({'error': 'Password is required.'}), 400
+    try:
+        with db.cursor() as cur:
+            
+            cur.execute(
+                "SELECT * FROM users WHERE email = %s",
+                (email,)
+            )
+
+            user = cur.fetchone()
+            if user is None or not check_password_hash(user['password'], password):
+                return jsonify({'error': 'Invalid credentials.'}), 401
+            
+            return jsonify({'isAdmin': user['admin']}), 200
+            
+    except Exception as e:
+        return jsonify({'error':'No is work'}), 500
+
 
 #dev.to link
 @auth_bp.route('/auth/verify', methods=['GET'])

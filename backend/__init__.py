@@ -1,18 +1,24 @@
 import os
+import secrets
 from . import db
 from flask import Flask
 from flask_jwt_extended import  JWTManager
+from flask_cors import CORS
 
 jwt = JWTManager()
 
 # Might need to change here for pool
 # Mainly flask docs
+
+# Combo of docs, ai, and own
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    
+    CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_mapping(
         SECRET_KEY='dev',  # Key should be something random for deployment
         DATABASE=os.environ.get("DATABASE_URL"),
-        JWT_SECRET_KEY = "SUPER SECRET KEY"
+        JWT_SECRET_KEY = secrets.token_hex(64)
         # Should add so tokens expire like 1h after last request or similar
     )
 
