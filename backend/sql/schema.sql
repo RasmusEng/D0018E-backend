@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE TABLE IF NOT EXISTS order_items (
     order_id INTEGER NOT NULL,
+    product_name VARCHAR(50) NOT NULL CHECK(product_name <> '')
     product_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
     list_price INTEGER,
