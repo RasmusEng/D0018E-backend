@@ -1,4 +1,5 @@
 -- PERHAPS have better check for names and not just that the cant be empty strings
+-- PERHAPS some delete cascade things. (ON DELETE CASCADE)
 
 DO $$ BEGIN
     CREATE TYPE diet_type AS ENUM ('carnivore', 'omnivore', 'herbivore');
