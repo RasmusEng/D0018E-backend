@@ -1,6 +1,4 @@
---TODO 
--- Fix all varchars 
--- Fix what can be NULL
+-- PERHAPS have better check for names and not just that the cant be empty strings
 
 DO $$ BEGIN
     CREATE TYPE diet_type AS ENUM ('carnivore', 'omnivore', 'herbivore');
@@ -23,14 +21,14 @@ END $$;
 CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(50) NOT NULL CHECK(name <> ''), 
     user_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    email VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    admin BOOLEAN NOT NULL
+    email VARCHAR(50) UNIQUE NOT NULL CHECK(email <> ''),
+    password VARCHAR(255) NOT NULL CHECK(password <> ''),
+    admin BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS products (
     product_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    product_name VARCHAR(50),
+    product_name VARCHAR(50) NOT NULL CHECK(product_name <> ''),
     weight INTEGER,
     height DECIMAL(10, 2),
     length DECIMAL(10, 2),
@@ -39,16 +37,16 @@ CREATE TABLE IF NOT EXISTS products (
     dino_type dino_type_type,
     description TEXT,
     image TEXT,
-    stock INTEGER,
-    amount_sold INTEGER,
+    stock INTEGER NOT NULL,
+    amount_sold INTEGER NOT NULL DEFAULT 0,
     price INTEGER,
-    published BOOLEAN
+    published BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS orders (
     order_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id INTEGER NOT NULL, 
-    order_status SMALLINT NOT NULL,
+    order_complete BOOLEAN NOT NULL DEFAULT FALSE,
     order_date DATE DEFAULT CURRENT_DATE,
     shipped_date DATE,
  
@@ -59,7 +57,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     order_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
-    list_price NUMERIC(10, 2),
+    list_price INTEGER,
 
     PRIMARY KEY (order_id, product_id),
 
@@ -68,7 +66,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 CREATE TABLE IF NOT EXISTS cart (
-    cart_id SERIAL PRIMARY KEY,
+    cart_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id INTEGER NOT NULL UNIQUE, 
  
     FOREIGN KEY (user_id) REFERENCES users (user_id)
@@ -86,11 +84,11 @@ CREATE TABLE IF NOT EXISTS cart_items (
 );
 
 CREATE TABLE IF NOT EXISTS review (
-    review_id SERIAL PRIMARY KEY,
-    product_id INTEGER,
+    review_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    product_id INTEGER NOT NULL,
     review_text TEXT,
-    grade INTEGER CHECK(grade >= 1 AND grade <= 5),
-    user_id INTEGER,
+    grade INTEGER CHECK(grade >= 1 AND grade <= 5) NOT NULL,
+    user_id INTEGER NOT NULL,
     verified_customer BOOLEAN,
     date DATE DEFAULT CURRENT_DATE,
 
