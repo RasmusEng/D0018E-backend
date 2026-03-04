@@ -1,6 +1,7 @@
 -- PERHAPS have better check for names and not just that the cant be empty strings
 -- PERHAPS some delete cascade things. (ON DELETE CASCADE)
 -- PERHAPS change from date so we have both date and time
+-- ADD DATE TO ORDER
 
 DO $$ BEGIN
     CREATE TYPE diet_type AS ENUM ('carnivore', 'omnivore', 'herbivore');
