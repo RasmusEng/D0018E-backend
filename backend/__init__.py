@@ -1,11 +1,6 @@
 import os
 import secrets
 
-<<<<<<< HEAD
-from backend.endpoints import admin
-=======
-from .endpoints import cart
->>>>>>> 02d1d15 (feat: checkout)
 from . import db
 from flask import Flask
 from flask_jwt_extended import  JWTManager
@@ -38,16 +33,14 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-<<<<<<< HEAD
-    from .endpoints import products, review, orders, order_items, users, auth, admin
-=======
-    from .endpoints import products, review, cart, auth, checkout
->>>>>>> 02d1d15 (feat: checkout)
+    from .endpoints import products, review, checkout, cart, auth, admin, orders
     app.register_blueprint(products.products_bp)
     app.register_blueprint(checkout.checkout_bp)
     app.register_blueprint(review.review_bp)
+    app.register_blueprint(orders.orders_bp)
     app.register_blueprint(cart.cart_bp)
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(admin.admin_bp)
+    
 
     return app

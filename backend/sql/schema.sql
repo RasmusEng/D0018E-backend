@@ -1,5 +1,6 @@
 -- PERHAPS have better check for names and not just that the cant be empty strings
 -- PERHAPS some delete cascade things. (ON DELETE CASCADE)
+-- PERHAPS change from date so we have both date and time
 
 DO $$ BEGIN
     CREATE TYPE diet_type AS ENUM ('carnivore', 'omnivore', 'herbivore');
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE TABLE IF NOT EXISTS order_items (
     order_id INTEGER NOT NULL,
-    product_name VARCHAR(50) NOT NULL CHECK(product_name <> '')
+    product_name VARCHAR(50) NOT NULL CHECK(product_name <> ''),
     product_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
     list_price INTEGER,

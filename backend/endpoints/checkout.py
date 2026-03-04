@@ -16,7 +16,7 @@ def checkout():
     user_id = get_jwt_identity()
 
     try:
-        with db.cursor().transaction() as cur:
+        with db.cursor() as cur:
             # Get cart id
             cur.execute("""
                 SELECT 
@@ -103,6 +103,16 @@ def checkout():
                 WHERE cart_id = %(cart_id)s
             """, {'cart_id': cart_id, }
             )
+
+            # Delete cart
+            cur.execute(""" 
+                DELETE FROM cart
+                WHERE cart_id = %(cart_id)s
+            """, {'cart_id': cart_id, }
+            )
+
+
+        db.commit()
 
         return jsonify({'message': 'Checkout completed successfully', 'order_id': order_id}), 200
         
