@@ -10,7 +10,7 @@ def get_all_products():
     with db.cursor() as cur:
 
         cur.execute(
-            "SELECT * FROM products;"
+            "SELECT * FROM products WHERE published = TRUE;"
         )
 
         products = cur.fetchall()
