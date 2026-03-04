@@ -102,7 +102,7 @@ def getUsersCartInfo():
         return jsonify({'error': str(e)}), 500
     
     
-@cart_bp.route('/cart/removeFromCart', methods=['POST'])
+@cart_bp.route('/cart/removeFromCart', methods=['PATCH'])
 @jwt_required() 
 def removeFromCart():
     db = get_db()

@@ -46,7 +46,7 @@ def create_app(test_config=None):
     app.register_blueprint(products.products_bp)
     app.register_blueprint(checkout.checkout_bp)
     app.register_blueprint(review.review_bp)
-    app.register_blueprint(cart.orders_bp)
+    app.register_blueprint(cart.cart_bp)
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(admin.admin_bp)
 
