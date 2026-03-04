@@ -1,11 +1,14 @@
 import os
 import secrets
+
+from backend.endpoints import admin
 from . import db
 from flask import Flask
 from flask_jwt_extended import  JWTManager
 from flask_cors import CORS
 
 jwt = JWTManager()
+
 
 # Might need to change here for pool
 # Mainly flask docs
@@ -31,12 +34,13 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    from .endpoints import products, review, orders, order_items, users, auth
+    from .endpoints import products, review, orders, order_items, users, auth, admin
     app.register_blueprint(products.products_bp)
     app.register_blueprint(review.review_bp)
     app.register_blueprint(orders.orders_bp)
     app.register_blueprint(order_items.order_items_bp)
     app.register_blueprint(users.users_bp)
     app.register_blueprint(auth.auth_bp)
+    app.register_blueprint(admin.admin_bp)
 
     return app
