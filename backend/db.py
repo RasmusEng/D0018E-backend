@@ -4,8 +4,8 @@ import os
 from dotenv import load_dotenv
 from psycopg.rows import dict_row
 # from psycopg_pool import ConnectionPool
-
-from flask import current_app, g
+from werkzeug.security import generate_password_hash
+from flask import abort, current_app, g
 
 load_dotenv()
 
@@ -33,21 +33,29 @@ def init_db():
     with db.cursor() as cur:
         with current_app.open_resource('sql/schema.sql') as f:
             cur.execute(f.read().decode('utf8'))
-
     db.commit()
 
 def load_dummy_data():
     db = get_db()
-
+    email = "admin@dinostore.se"
+    name = "Dr. Henry Wu"
+    password = "ThisIsAPassword!"
     with db.cursor() as cur:
         with current_app.open_resource('sql/dummyData.sql') as f:
             cur.execute(f.read().decode('utf8'))
+        
+        cur.execute(
+                "INSERT INTO users (email, password, name, admin) VALUES (%s, %s, %s, True)",
+                (email, generate_password_hash(password), name)
+        )
 
     db.commit()
 
 # Make something so we dont nuke our database
 @click.command('init-db')
 def init_db_command():
+    
+
     init_db()
     click.echo('Initialized the database.')
 
