@@ -1,5 +1,5 @@
 from flask import Blueprint, abort, jsonify, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from psycopg.errors import ForeignKeyViolation
 from ..db import *
 orders_bp = Blueprint('orders', __name__)
@@ -75,54 +75,6 @@ def addToCart():
         db.rollback()
         return jsonify({'error': str(e)}), 500
 
-
-@orders_bp.route('/orders/getUsersCart', methods=['GET'])
-@jwt_required()  # You can only get your own cart
-def getUsersCartInfo():
-    db = get_db()
-    user_id = get_jwt_identity()
-
-    try:
-        with db.cursor() as cur:
-            cur.execute("""
-            SELECT 
-                product_id,
-                product_name,
-                quantity,
-                (price * quantity) AS total_price,  
-                price AS unit_price,
-                image AS image_url
-            FROM cart 
-            JOIN cart_items USING (cart_id)
-            JOIN products USING (product_id)
-            WHERE user_id = %s
-            """, (user_id,)
-            )
-            # Indented these so the cursor stays open!
-            items = cur.fetchall()
-
-            # Query 2: Get the total price and weight of the cart
-            cur.execute("""
-            SELECT 
-                sum(price * quantity) AS total_price,
-                sum(weight * quantity) AS total_weight
-            FROM cart 
-            JOIN cart_items USING (cart_id)
-            JOIN products USING (product_id)
-            WHERE user_id = %s
-            """, (user_id,)
-            )
-            total_price = cur.fetchone()
-
-            return jsonify({"items": items, "total_price": total_price}), 200
-
-    except ForeignKeyViolation as e:
-        return jsonify({'error': 'Product does not exist'}), 404
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 # Added /api/ to the route prefix
 @orders_bp.route('/orders/removeFromCart', methods=['POST'])
 @jwt_required()
@@ -176,7 +128,7 @@ def get_users_orders():
             cur.execute(
                 """SELECT 
                         o.order_id,
-                        o.order_complete,
+                        o.order_state,
                         o.order_date,
                         o.shipped_date,
                         oi.product_name,
