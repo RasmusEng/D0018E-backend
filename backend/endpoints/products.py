@@ -10,7 +10,7 @@ def get_all_products():
     with db.cursor() as cur:
 
         cur.execute(
-            "SELECT * FROM products;"
+            "SELECT * FROM products WHERE published = TRUE;"
         )
 
         products = cur.fetchall()
@@ -20,8 +20,7 @@ def get_all_products():
 
     return jsonify(products)
 
-# Gemini and flask doc and own
-# Add so reviews are also sent
+
 @products_bp.route('/products/<int:productID>', methods=['GET'])
 def get_product_by_id(productID):
     db = get_db()
@@ -37,3 +36,4 @@ def get_product_by_id(productID):
         abort(404, description="No product with provided product id found")
 
     return jsonify(product)
+
