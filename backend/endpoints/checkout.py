@@ -50,16 +50,18 @@ def checkout():
             cur.execute("""
                 INSERT INTO orders (
                     user_id, 
-                    order_complete, 
+                    order_state, 
                     order_date
                 ) 
                 VALUES(
                     %(user_id)s, 
-                    FALSE, 
+                    %(status)s, 
                     CURRENT_DATE
                 )
                 RETURNING order_id
-                """, {'user_id': user_id, }
+                """, {'user_id': user_id,
+                      'status': 'pending', 
+                     }
             )
             order_id = cur.fetchone()['order_id']
 

@@ -20,6 +20,12 @@ DO $$ BEGIN
 EXCEPTION 
     WHEN duplicate_object THEN NULL; 
 END $$;
+
+DO $$ BEGIN
+    CREATE TYPE order_state AS ENUM ('complete', 'pending', 'canceled');
+EXCEPTION 
+    WHEN duplicate_object THEN NULL; 
+END $$;
     
 CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(50) NOT NULL CHECK(name <> ''), 
@@ -49,7 +55,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS orders (
     order_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id INTEGER NOT NULL, 
-    order_complete BOOLEAN NOT NULL DEFAULT FALSE,
+    order_state order_state NOT NULL DEFAULT 'pending',
     order_date DATE DEFAULT CURRENT_DATE,
     shipped_date DATE,
  
