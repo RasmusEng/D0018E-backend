@@ -15,10 +15,10 @@ load_dotenv()
 # Change this to a pool
 def get_db():
     if 'db' not in g:
-        g.db = psycopg.connect(
-            conninfo=os.environ.get("DB_URL"),
-            row_factory=dict_row
-        )
+        db_url = current_app.config.get("DATABASE_URL") or os.environ.get("DATABASE_URL")
+        if not db_url:
+            raise RuntimeError("DATABASE_URL is not set")
+        g.db = psycopg.connect(conninfo=db_url, row_factory=dict_row)
     return g.db
 
 # Change this to a pool

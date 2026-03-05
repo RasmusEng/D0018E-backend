@@ -2,7 +2,7 @@ import os
 import secrets
 
 from . import db
-from flask import Flask
+from flask import Flask, app
 from flask_jwt_extended import  JWTManager
 from flask_cors import CORS
 
@@ -18,11 +18,14 @@ def create_app(test_config=None):
     
     CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_mapping(
-        SECRET_KEY='dev',  # Key should be something random for deployment
-        DATABASE=os.environ.get("DATABASE_URL"),
-        JWT_SECRET_KEY = secrets.token_hex(64)
-        # Should add so tokens expire like 1h after last request or similar
+        SECRET_KEY=os.environ.get("SECRET_KEY", "dev"),
+        # Use ONE variable name everywhere: DATABASE_URL
+        DATABASE_URL=os.environ.get("DATABASE_URL"),
+        # Use a stable key from env; fallback only for dev
+        JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY", secrets.token_hex(64)),
     )
+    if not app.config["DATABASE_URL"]:
+        raise RuntimeError("DATABASE_URL is not set")
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
