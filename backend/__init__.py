@@ -20,7 +20,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',  # Key should be something random for deployment
         DATABASE=os.environ.get("DATABASE_URL"),
-        JWT_SECRET_KEY = secrets.token_hex(64)
+        JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY")
         # Should add so tokens expire like 1h after last request or similar
     )
 

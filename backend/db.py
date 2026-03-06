@@ -16,7 +16,7 @@ load_dotenv()
 def get_db():
     if 'db' not in g:
         g.db = psycopg.connect(
-            conninfo=os.environ.get("DB_URL"),
+            conninfo=os.environ.get("DATABASE_URL"),
             row_factory=dict_row
         )
     return g.db
