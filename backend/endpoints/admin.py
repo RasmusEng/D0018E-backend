@@ -1,3 +1,4 @@
+from flask import request, jsonify
 from unicodedata import name
 
 from flask import Blueprint, abort, jsonify, request
@@ -176,39 +177,42 @@ def change_product_price(product_id):
 def change_order_status(order_id):
     try:
         data = request.get_json()
+        new_status = data.get('status')
 
-        if data is None or 'status' not in data:
-            return jsonify({"error": "Missing 'status' value"}), 400
+        if not new_status:
+            return jsonify({"error": "Missing status field"}), 400
 
-        try:
-            new_status = bool(data['status'])
-        except ValueError:
-            return jsonify({"error": "Status must be a boolean"}), 400
+        clean_status = str(new_status).lower().strip()
+        print(order_id, clean_status)
 
         db = get_db()
         with db.cursor() as cur:
             cur.execute(
                 """
                 UPDATE orders
-                SET order_complete = %s
+                SET order_state = %s
                 WHERE order_id = %s
-                RETURNING order_complete
+                RETURNING order_id, order_state
                 """,
-                (new_status, order_id)
+                (clean_status, order_id)
             )
             result = cur.fetchone()
 
         if not result:
-            return jsonify({"error": "Order not found"}), 404
+            return jsonify({"error": "Order ID not found in database"}), 404
 
         db.commit()
+
+
         return jsonify({
-            "message": "Order status updated",
-            "new_status": result['order_complete']
+            "message": "Update successful",
+            "new_status": result['order_state']
         }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        # This will print the exact SQL error to your terminal
+        print(f"DEBUG ERROR: {str(e)}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
 @admin_bp.route('/admin/create-admin', methods=['POST'])
@@ -228,7 +232,6 @@ def create_admin():
     try:
         with db.cursor() as cur:
 
-
             cur.execute(
                 "INSERT INTO users (email, password, name, admin) VALUES (%s, %s, %s, True)",
                 (email, generate_password_hash(password), name)
@@ -242,8 +245,6 @@ def create_admin():
 
     return jsonify({'message': 'User registered successfully'}), 200
 
-from flask import request, jsonify
-import psycopg
 
 @admin_bp.route('/admin/create-product', methods=['POST'])
 @admin_required()
@@ -253,17 +254,17 @@ def create_product():
 
     try:
         product_name = data.get('product_name')
-        
+
         weight = float(data.get('weight') or 0)
         height = float(data.get('height') or 0)
         length = float(data.get('length') or 0)
-        
+
         diet = data.get('diet').lower()
         region = data.get('region', '').lower()
         dino_type = data.get('dino_type').lower()
         description = data.get('description', '')
         image = data.get('image', '')
-        
+
         stock = int(data.get('stock') or 0)
         amount_sold = int(data.get('amount_sold') or 0)
         price = float(data.get('price') or 0.0)
@@ -271,7 +272,6 @@ def create_product():
 
         if not product_name:
             return jsonify({'error': 'Specimen designation (name) is required.'}), 400
-
 
         with db.cursor() as cur:
             cur.execute(
@@ -282,7 +282,7 @@ def create_product():
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
-                    product_name, weight, height, length, diet, region, 
+                    product_name, weight, height, length, diet, region,
                     dino_type, description, image, stock, amount_sold, price, published
                 )
             )
@@ -292,10 +292,10 @@ def create_product():
     except psycopg.errors.UniqueViolation:
         db.rollback()
         return jsonify({'error': 'A specimen with this designation already exists.'}), 409
-    
+
     except Exception as e:
         db.rollback()
-        print(f"\n[MAINFRAME DATABASE ERROR]: {str(e)}\n") 
+        print(f"\n[MAINFRAME DATABASE ERROR]: {str(e)}\n")
         return jsonify({'error': str(e)}), 500
 
 
@@ -317,5 +317,5 @@ def remove_product(product_id):
 
     except Exception as e:
         db.rollback()
-        print(f"\n[MAINFRAME DATABASE ERROR]: {str(e)}\n") 
+        print(f"\n[MAINFRAME DATABASE ERROR]: {str(e)}\n")
         return jsonify({'error': str(e)}), 500
